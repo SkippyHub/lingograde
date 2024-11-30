@@ -10,9 +10,13 @@ else
 endif
 
 # Check if pyenv is available
-PYENV_PATH := $(shell command -v pyenv 2> /dev/null)
+PYENV_PATH := $(shell command -v pyenv 2> /dev/null || where pyenv 2> /dev/null)
 ifdef PYENV_PATH
-	PYTHON_PATH := $(HOME)/.pyenv/versions/3.11.7/bin/python
+	ifeq ($(OS),Windows_NT)
+		PYTHON_PATH := $(shell pyenv prefix 3.11.7)/python
+	else
+		PYTHON_PATH := $(shell pyenv prefix 3.11.7)/bin/python
+	endif
 endif
 
 venv:

@@ -2,6 +2,8 @@ import time
 from typing import Union, Dict, Any
 import random
 
+# import gemma 
+
 class AIModel:
     def __init__(self):
         self.loaded = False
@@ -16,6 +18,7 @@ class AIModel:
     
     def preprocess_audio(self, audio_bytes: bytes) -> Dict[str, Any]:
         """Simulate audio preprocessing"""
+        
         return {
             "processed_data": audio_bytes[:100],  # Just take first 100 bytes for demo
             "sample_rate": 16000,
@@ -25,6 +28,7 @@ class AIModel:
     def transcribe_audio(self, processed_data: Dict[str, Any]) -> str:
         """Simulate transcription"""
         # In reality, this would use a speech-to-text model
+        
         dummy_responses = [
             "Hello, how can I help you today?",
             "I'd like to schedule an appointment.",
@@ -37,6 +41,8 @@ class AIModel:
         """Simulate AI response generation"""
         # Simulate some processing time
         time.sleep(0.5)
+        
+        # use gemma model to generate questions.
         
         responses = {
             "Hello, how can I help you today?": {
@@ -71,6 +77,9 @@ class AIModel:
         """Generate speech quality grades"""
         # In a real implementation, this would use actual NLP models
         # For now, we'll generate realistic-looking random grades
+        
+        
+        
         return {
             'pronunciation': round(random.uniform(0.6, 1.0), 2),
             'fluency': round(random.uniform(0.6, 1.0), 2),
@@ -83,6 +92,8 @@ class AIModel:
         """Main prediction pipeline"""
         if not self.loaded:
             raise RuntimeError("Model not loaded")
+        
+        
     
         try:
             # Process audio

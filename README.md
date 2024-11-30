@@ -15,6 +15,39 @@ D --> G[/storage/recordings/]
 classDef main fill:#f96,stroke:#333,stroke-width:2px;
 classDef component fill:#bbf,stroke:#333,stroke-width:2px;
 classDef storage fill:#bfb,stroke:#333,stroke-width:2px;
+
+class A main;
+class B,C,D component;
+class F,G storage;
+```
+
+### Data Flow Sequence
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant M as Main App
+    participant S as StorageManager
+    participant D as DatabaseManager
+    participant A as AIModel
+
+    U->>M: Start Recording
+    M->>M: Record Audio
+    
+    U->>M: Stop Recording
+    M->>S: Save Audio File
+    S-->>M: File Path
+    
+    M->>A: Process Audio
+    A-->>M: Model Results
+    
+    M->>D: Save Recording Data
+    D-->>M: Recording ID
+    
+    M->>D: Get Recordings
+    D-->>M: Recording List
+    M->>S: Get Audio Files
+    S-->>M: Audio Files
+    M->>U: Display Results
 ```
 
 ### File Structure and Responsibilities
@@ -209,6 +242,5 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines.
 docker build -t lingograde .
 docker run -p 8501:8501 lingograde
 ```
-
 
 
