@@ -30,6 +30,18 @@ class StreamlitApp:
         self.recordings_dir = self.storage_manager.base_path
         logger.debug(f"Recordings directory: {self.recordings_dir}")
         
+        # Initialize session state for recording handling and results
+        if 'new_recording' not in st.session_state:
+            st.session_state.new_recording = False
+        if 'last_result' not in st.session_state:
+            st.session_state.last_result = None
+        if 'last_audio' not in st.session_state:
+            st.session_state.last_audio = None
+    
+    def refresh_sidebar(self):
+        """Force sidebar to refresh by incrementing a key"""
+        st.session_state.recordings_key += 1
+    
     def save_audio_file(self, audio_bytes: bytes, filename: str) -> str:
         """Save audio data using StorageManager"""
         logger.debug(f"Saving audio file: {filename}")
@@ -128,30 +140,23 @@ class StreamlitApp:
                         if audio_path.exists():
                             st.audio(str(audio_path))
         
-        # Add test button at the top
-        st.write("### Test Audio System")
-        if st.button("Save Test Audio"):
-            test_file = self.save_test_audio()
-            if test_file:
-                st.success(f"Test audio saved successfully to {test_file}")
-                st.audio(test_file)
-            else:
-                st.error("Failed to save test audio")
-        
-        st.write("---")  # Add a separator
-        
         # Main content area
         st.write("### Record Audio")
         
-        # Use audio_recorder instead of st.audio_recorder
         audio_bytes = audio_recorder(
             text="Click to record",
             recording_color="#e85252",
             neutral_color="#6aa36f"
         )
 
-        if audio_bytes:
-            # Save the recorded audio
+        # Display last result if exists
+        if st.session_state.last_result:
+            st.write("### Result:")
+            st.write(st.session_state.last_result)
+            if st.session_state.last_audio:
+                st.audio(st.session_state.last_audio)
+
+        if audio_bytes and not st.session_state.new_recording:
             try:
                 filename = f"recording_{uuid.uuid4()}.wav"
                 file_path = self.save_audio_file(audio_bytes, filename)
@@ -163,22 +168,27 @@ class StreamlitApp:
                     result = self.model.predict(audio_bytes)
                     logger.debug(f"Model prediction result: {result}")
                 
-                # Save to database - convert dict to JSON string
-                logger.debug(f"Saving recording metadata to database")
+                # Save to database
                 self.db_manager.save_recording(
                     user_id=st.session_state.user_id,
                     filename=filename,
-                    model_response=json.dumps(result)  # Convert dict to JSON string
+                    model_response=json.dumps(result)
                 )
                 
-                # Show results
-                st.write("### Result:")
-                st.write(result)
-                st.audio(audio_bytes)
+                # Store results in session state
+                st.session_state.last_result = result
+                st.session_state.last_audio = audio_bytes
+                
+                # Set flag and rerun
+                st.session_state.new_recording = True
+                st.rerun()
                 
             except Exception as e:
                 logger.error(f"Error processing audio: {str(e)}", exc_info=True)
                 st.error(f"Error processing audio: {str(e)}")
+        else:
+            # Reset the recording flag after rerun
+            st.session_state.new_recording = False
 
 if __name__ == "__main__":
     # Set up root logger

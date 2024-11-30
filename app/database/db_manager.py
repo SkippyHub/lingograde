@@ -11,7 +11,7 @@ class DatabaseManager:
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        # Create recordings table
+        # Create recordings table with speech grades
         c.execute('''
             CREATE TABLE IF NOT EXISTS recordings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,7 +21,12 @@ class DatabaseManager:
                 duration FLOAT,
                 transcription TEXT,
                 model_response TEXT,
-                metadata TEXT
+                metadata TEXT,
+                pronunciation_grade FLOAT,
+                fluency_grade FLOAT,
+                coherence_grade FLOAT,
+                grammar_grade FLOAT,
+                vocabulary_grade FLOAT
             )
         ''')
         
@@ -39,16 +44,25 @@ class DatabaseManager:
         conn.close()
 
     def save_recording(self, user_id, filename, duration=None, transcription=None, 
-                      model_response=None, metadata=None):
+                      model_response=None, metadata=None, grades=None):
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
+        # Extract grades or use defaults
+        grades = grades or {}
+        pronunciation = grades.get('pronunciation', 0.0)
+        fluency = grades.get('fluency', 0.0)
+        coherence = grades.get('coherence', 0.0)
+        grammar = grades.get('grammar', 0.0)
+        vocabulary = grades.get('vocabulary', 0.0)
+        
         c.execute('''
             INSERT INTO recordings 
-            (user_id, filename, timestamp, duration, transcription, model_response, metadata)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (user_id, filename, timestamp, duration, transcription, model_response, metadata,
+             pronunciation_grade, fluency_grade, coherence_grade, grammar_grade, vocabulary_grade)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (user_id, filename, datetime.now(), duration, transcription, 
-              model_response, metadata))
+              model_response, metadata, pronunciation, fluency, coherence, grammar, vocabulary))
         
         conn.commit()
         conn.close()

@@ -4,8 +4,3 @@ numpy
 pandas
 python-dotenv
 soundfile
-logging
-uuid
-queue
-os
-json

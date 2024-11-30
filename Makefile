@@ -1,4 +1,4 @@
-.PHONY: venv install run test lint clean
+.PHONY: venv install install-dev run test lint clean
 
 # Detect OS
 ifeq ($(OS),Windows_NT)
@@ -19,20 +19,23 @@ venv:
 	$(PYTHON_PATH) -m venv venv
 
 install: venv
-	$(VENV_BIN)/python -m pip install --upgrade pip
-	$(VENV_BIN)/python -m pip install -r requirements.txt
+	. venv/bin/activate && pip install --upgrade pip
+	. venv/bin/activate && pip install -r requirements.txt
+
+install-dev: install
+	. venv/bin/activate && pip install -r requirements-dev.txt
 
 run: venv
-	$(VENV_BIN)/python -m streamlit run app/main.py
+	. venv/bin/activate && python -m streamlit run app/main.py
 
 test: venv
-	$(VENV_BIN)/python -m pytest
+	. venv/bin/activate && python -m pytest
 
 lint: venv
-	$(VENV_BIN)/python -m flake8 .
-	$(VENV_BIN)/python -m black .
+	. venv/bin/activate && python -m flake8 .
+	. venv/bin/activate && python -m black .
 
 clean:
 	rm -rf venv
 	find . -type d -name "__pycache__" -exec rm -rf {} +
-	find . -type f -name "*.pyc" -delete 
+	find . -type f -name "*.pyc" -delete
