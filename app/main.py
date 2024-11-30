@@ -161,19 +161,32 @@ class StreamlitApp:
                 filename = f"recording_{uuid.uuid4()}.wav"
                 file_path = self.save_audio_file(audio_bytes, filename)
                 
-                logger.debug(f"Saved recorded audio to {file_path}")
-                
                 # Process with model
                 with st.spinner("Processing..."):
                     result = self.model.predict(audio_bytes)
-                    logger.debug(f"Model prediction result: {result}")
-                
-                # Save to database
+                    
+                # Save to database with grades
                 self.db_manager.save_recording(
                     user_id=st.session_state.user_id,
                     filename=filename,
-                    model_response=json.dumps(result)
+                    model_response=json.dumps(result),
+                    grades=result.get('grades', {})
                 )
+                
+                # Display results including grades
+                st.write("### Speech Analysis")
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.write("**Transcription:**")
+                    st.write(result['transcription'])
+                    
+                with col2:
+                    st.write("**Grades:**")
+                    for grade_name, grade_value in result['grades'].items():
+                        st.write(f"{grade_name.title()}: {grade_value:.2f}")
+                
+                st.audio(audio_bytes)
                 
                 # Store results in session state
                 st.session_state.last_result = result

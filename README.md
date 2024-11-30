@@ -1,53 +1,98 @@
 # lingograde
 lingo grade, grades your speech, identifies issues, and enhances language skills to become a native speaker.
 
-#features
-#recording
-- record from microphone
-- record from file
-- record from youtube
+## Architecture
 
-##grading skills 
-grades in a star graph, provide a prompt to read and analyze your speech.
-it will grade your speech and provide a star graph with the grade.
-a gauge on the certification level you are at.
+### Component Overview
+```mermaid
+graph TD
+A[main.py] --> B[model/predictor.py]
+A --> C[database/db_manager.py]
+A --> D[storage/storage_manager.py]
+B --> E[AI Model Interface]
+C --> F[(SQLite Database)]
+D --> G[/storage/recordings/]
+classDef main fill:#f96,stroke:#333,stroke-width:2px;
+classDef component fill:#bbf,stroke:#333,stroke-width:2px;
+classDef storage fill:#bfb,stroke:#333,stroke-width:2px;
+```
 
-###speech
-- pronunciation 
-how well you pronounce the words
-- fluency
-how well you speak fluent, your melody is 
-- Coherence
-how well you speak coherent, your ideas are clear. 
-- grammar
-how well you speak grammatically correct.
-- vocabulary 
-how diverse your vocabulary is.
+### File Structure and Responsibilities
 
-###certification
-- CEFR scale grade.
-a scale grade of your english level. according to the CEFR scale. 
-A1, A2, B1, B2, C1, C2
-- IELTS scale grade.
-a scale grade of your english level. according to the IELTS scale. from 1 to 9.
+1. **main.py**
+   - Main Streamlit application entry point
+   - Handles user interface and interaction
+   - Coordinates between model, storage, and database components
+   - Manages audio recording and playback
 
+2. **model/predictor.py**
+   - Contains the AIModel class
+   - Handles speech processing and analysis
+   - Returns predictions and transcriptions
+   - Processes audio data into meaningful results
 
-##goals MVP challenge
+3. **database/db_manager.py**
+   - Manages SQLite database operations
+   - Stores recording metadata and results
+   - Handles user sessions and recording history
+   - Provides CRUD operations for recordings
+
+4. **storage/storage_manager.py**
+   - Manages physical file storage
+   - Organizes recordings by user ID
+   - Handles file saving and retrieval
+   - Maintains directory structure
+
+5. **storage/recordings/**
+   - Physical storage location for audio files
+   - Organized in user-specific directories
+   - Contains WAV format audio recordings
+
+### Data Flow
+1. User records audio through Streamlit interface
+2. Audio is saved via StorageManager
+3. Audio is processed by AIModel
+4. Results are stored in database via DatabaseManager
+5. Results and audio playback are displayed in UI
+
+## Features
+### Recording
+- Record from microphone
+- Record from file
+- Record from youtube
+
+### Grading Skills 
+Grades in a star graph, provide a prompt to read and analyze your speech.
+It will grade your speech and provide a star graph with the grade.
+A gauge on the certification level you are at.
+
+#### Speech
+- **Pronunciation**: How well you pronounce the words
+- **Fluency**: How well you speak fluent, your melody is 
+- **Coherence**: How well you speak coherent, your ideas are clear
+- **Grammar**: How well you speak grammatically correct
+- **Vocabulary**: How diverse your vocabulary is
+
+#### Certification
+- **CEFR scale grade**: A scale grade of your English level according to the CEFR scale (A1, A2, B1, B2, C1, C2)
+- **IELTS scale grade**: A scale grade of your English level according to the IELTS scale (1-9)
+
+## Goals MVP Challenge
 ### MVP 1
-- record from microphone
-- grading skills
-- star graph
+- Record from microphone
+- Grading skills
+- Star graph
 
 ### MVP 2
-- certification
+- Certification
 
-##stack
-- python
-- docker
-- streamlit
-- gemma  
+## Stack
+- Python
+- Docker
+- Streamlit
+- Gemma
 
-##packages
+## Packages
 - whisper (audio to text)
 - gemma 2 (text to text)
 - langchain (chaining models)
@@ -56,13 +101,11 @@ a scale grade of your english level. according to the IELTS scale. from 1 to 9.
 - numpy (audio processing)
 - pandas (audio processing)
 
-
-##Additional Packages
+## Additional Packages
 - librosa (advanced audio analysis)
 - pyDictionary (vocabulary enhancement)
 - spaCy (NLP processing)
 - pytest (testing framework)
-
 
 ## Installation
 

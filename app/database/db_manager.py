@@ -6,6 +6,7 @@ class DatabaseManager:
     def __init__(self, db_path="app/database/recordings.db"):
         self.db_path = db_path
         self.init_db()
+        self.migrate_db()
 
     def init_db(self):
         conn = sqlite3.connect(self.db_path)
@@ -30,15 +31,30 @@ class DatabaseManager:
             )
         ''')
         
-        # Create users table
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                user_id TEXT PRIMARY KEY,
-                name TEXT,
-                created_at DATETIME NOT NULL,
-                last_active DATETIME
-            )
-        ''')
+        conn.commit()
+        conn.close()
+
+    def migrate_db(self):
+        """Add new columns if they don't exist"""
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        
+        # Get existing columns
+        c.execute('PRAGMA table_info(recordings)')
+        columns = {col[1] for col in c.fetchall()}
+        
+        # Add missing columns
+        new_columns = {
+            'pronunciation_grade': 'FLOAT',
+            'fluency_grade': 'FLOAT',
+            'coherence_grade': 'FLOAT',
+            'grammar_grade': 'FLOAT',
+            'vocabulary_grade': 'FLOAT'
+        }
+        
+        for col_name, col_type in new_columns.items():
+            if col_name not in columns:
+                c.execute(f'ALTER TABLE recordings ADD COLUMN {col_name} {col_type}')
         
         conn.commit()
         conn.close()
