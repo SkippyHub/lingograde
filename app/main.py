@@ -102,6 +102,10 @@ class StreamlitApp:
         self.initialize_session()
         st.title("AI Model Interface")
         
+        # Initialize recordings_key if not exists
+        if 'recordings_key' not in st.session_state:
+            st.session_state.recordings_key = 0
+        
         # Sidebar for displaying recordings
         with st.sidebar:
             st.header("Your Recordings")
@@ -111,34 +115,37 @@ class StreamlitApp:
                 st.info("No recordings yet")
             else:
                 for recording in recordings:
-                    # Unpack recording data
-                    _, _, filename, timestamp, duration, transcription, model_response, metadata = recording
+                    # Debug log to see what we're getting
+                    logger.debug(f"Recording data: {recording}")
                     
-                    # Create an expander for each recording
-                    with st.expander(f"📝 {timestamp}"):
-                        st.write(f"**Filename:** {filename}")
-                        if model_response:
-                            try:
-                                response_data = json.loads(model_response)
-                                st.write("**Transcription:**")
-                                st.write(response_data.get('transcription', 'No transcription available'))
-                                st.write("**AI Response:**")
-                                st.write(response_data.get('response', 'No response available'))
-                                
-                                # Display metadata if available
-                                if 'metadata' in response_data:
-                                    st.write("**Metadata:**")
-                                    st.json(response_data['metadata'])
-                            except json.JSONDecodeError:
-                                st.write(model_response)
+                    try:
+                        # Unpack the recording tuple safely
+                        recording_data = list(recording)
+                        recording_id = recording_data[0]
+                        filename = recording_data[2] if len(recording_data) > 2 else "Unknown"
+                        model_response = recording_data[3] if len(recording_data) > 3 else None
                         
-                        # Play audio button
-                        audio_path = self.storage_manager.get_recording_path(
-                            st.session_state.user_id, 
-                            filename
-                        )
-                        if audio_path.exists():
-                            st.audio(str(audio_path))
+                        # Create an expander for each recording
+                        with st.expander(f"📝 {filename}"):
+                            st.write(f"**Recording ID:** {recording_id}")
+                            if model_response:
+                                try:
+                                    response_data = json.loads(model_response)
+                                    st.write("**AI Response:**")
+                                    st.write(response_data)
+                                except json.JSONDecodeError:
+                                    st.write(model_response)
+                            
+                            # Play audio button
+                            audio_path = self.storage_manager.get_recording_path(
+                                st.session_state.user_id, 
+                                filename
+                            )
+                            if audio_path.exists():
+                                st.audio(str(audio_path))
+                    except Exception as e:
+                        logger.error(f"Error processing recording: {e}")
+                        st.error(f"Error displaying recording: {str(e)}")
         
         # Main content area
         st.write("### Record Audio")
