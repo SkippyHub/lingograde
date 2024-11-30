@@ -1,5 +1,11 @@
-streamlit
-torch
-transformers
+streamlit>=1.40.2
+audio-recorder-streamlit>=0.0.8
+numpy
+pandas
 python-dotenv
+soundfile
+logging
 uuid
+queue
+os
+json

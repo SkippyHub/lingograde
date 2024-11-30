@@ -4,7 +4,9 @@ import os
 from datetime import datetime
 
 class StorageManager:
-    def __init__(self, base_path="app/storage/recordings"):
+    def __init__(self, base_path=None):
+        if base_path is None:
+            base_path = Path(__file__).parent.parent / "storage" / "recordings"
         self.base_path = Path(base_path)
         self.base_path.mkdir(parents=True, exist_ok=True)
 

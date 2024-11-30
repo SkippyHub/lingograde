@@ -1,0 +1,37 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies including development tools
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    pkg-config \
+    portaudio19-dev \
+    make \
+    curl \
+    git \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies including development packages
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install pytest-watch black flake8 debugpy
+
+# Development-specific environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV STREAMLIT_SERVER_RUN_ON_SAVE=true
+
+# Mount point for local development
+VOLUME /app
+
+EXPOSE 8501
+EXPOSE 5678  # For debugger
+
+# Add debugging script
+COPY scripts/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["streamlit", "run", "app/main.py", "--server.address", "0.0.0.0"] 
