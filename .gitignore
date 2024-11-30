@@ -54,3 +54,7 @@ ENV/
 .DS_Store
 Thumbs.db 
 app/database/recordings.db
+frontend/node_modules/*
+frontend/dist/*
+frontend/build/*
+

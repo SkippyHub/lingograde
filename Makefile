@@ -1,4 +1,4 @@
-.PHONY: venv install install-dev run test lint clean
+.PHONY: venv install install-dev run test lint clean frontend-install frontend-dev api dev
 
 # Detect OS
 ifeq ($(OS),Windows_NT)
@@ -43,3 +43,18 @@ clean:
 	rm -rf venv
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
+
+# Frontend commands
+frontend-install:
+	cd frontend && npm install
+
+frontend-dev:
+	cd frontend && npm run dev
+
+# API commands
+api:
+	. venv/bin/activate && uvicorn app.api.main:app --reload --port 8000
+
+# Combined commands
+dev: install
+	make -j2 api frontend-dev

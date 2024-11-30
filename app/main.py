@@ -10,6 +10,7 @@ import logging
 import soundfile as sf
 import os
 import json
+import plotly.graph_objects as go
 
 # Set up detailed logging
 logger = logging.getLogger(__name__)
@@ -33,10 +34,12 @@ class StreamlitApp:
         # Initialize session state for recording handling and results
         if 'new_recording' not in st.session_state:
             st.session_state.new_recording = False
-        if 'last_result' not in st.session_state:
-            st.session_state.last_result = None
-        if 'last_audio' not in st.session_state:
-            st.session_state.last_audio = None
+        if 'current_result' not in st.session_state:
+            st.session_state.current_result = None
+        if 'current_audio' not in st.session_state:
+            st.session_state.current_audio = None
+        if 'show_results' not in st.session_state:
+            st.session_state.show_results = False
     
     def refresh_sidebar(self):
         """Force sidebar to refresh by incrementing a key"""
@@ -98,6 +101,73 @@ class StreamlitApp:
             logger.error(f"Error saving test audio: {str(e)}", exc_info=True)
             return None
     
+    def display_grades_star_graph(self, grades):
+        """Display grades in a star/radar chart"""
+        categories = list(grades.keys())
+        values = list(grades.values())
+        values.append(values[0])  # Complete the circle
+        categories.append(categories[0])  # Complete the circle
+        
+        fig = go.Figure(data=go.Scatterpolar(
+            r=values,
+            theta=categories,
+            fill='toself',
+            name='Grades'
+        ))
+        
+        fig.update_layout(
+            polar=dict(
+                radialaxis=dict(
+                    visible=True,
+                    range=[0, 1]
+                )
+            ),
+            showlegend=False
+        )
+        
+        st.plotly_chart(fig)
+
+    def display_audio_player(self, audio_bytes):
+        """Display audio player with controls"""
+        st.audio(audio_bytes)
+
+    def display_transcription(self, transcription):
+        """Display transcription with formatting"""
+        st.write("**Transcription:**")
+        st.write(transcription)
+        
+    def display_analysis_results(self, result, audio_bytes):
+        """Display complete analysis results"""
+        st.write("### Speech Analysis")
+        
+        # Create three columns
+        col1, col2 = st.columns([3, 2])
+        
+        with col1:
+            # Transcription
+            self.display_transcription(result['transcription'])
+            
+            # Audio player
+            self.display_audio_player(audio_bytes)
+            
+            # Additional metadata
+            with st.expander("Detailed Metadata"):
+                st.json(result['metadata'])
+        
+        with col2:
+            # Grades star graph
+            st.write("**Speech Evaluation:**")
+            self.display_grades_star_graph(result['grades'])
+            
+            # Individual grades
+            st.write("**Detailed Grades:**")
+            for grade_name, grade_value in result['grades'].items():
+                st.metric(
+                    label=grade_name.title(),
+                    value=f"{grade_value:.2f}",
+                    delta=f"{(grade_value - 0.7):.2f}"  # Comparison against baseline
+                )
+
     def run(self):
         self.initialize_session()
         st.title("AI Model Interface")
@@ -156,12 +226,12 @@ class StreamlitApp:
             neutral_color="#6aa36f"
         )
 
-        # Display last result if exists
-        if st.session_state.last_result:
-            st.write("### Result:")
-            st.write(st.session_state.last_result)
-            if st.session_state.last_audio:
-                st.audio(st.session_state.last_audio)
+        # Show current results if they exist
+        if st.session_state.show_results and st.session_state.current_result:
+            self.display_analysis_results(
+                st.session_state.current_result, 
+                st.session_state.current_audio
+            )
 
         if audio_bytes and not st.session_state.new_recording:
             try:
@@ -180,34 +250,20 @@ class StreamlitApp:
                     grades=result.get('grades', {})
                 )
                 
-                # Display results including grades
-                st.write("### Speech Analysis")
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    st.write("**Transcription:**")
-                    st.write(result['transcription'])
-                    
-                with col2:
-                    st.write("**Grades:**")
-                    for grade_name, grade_value in result['grades'].items():
-                        st.write(f"{grade_name.title()}: {grade_value:.2f}")
-                
-                st.audio(audio_bytes)
-                
                 # Store results in session state
-                st.session_state.last_result = result
-                st.session_state.last_audio = audio_bytes
-                
-                # Set flag and rerun
+                st.session_state.current_result = result
+                st.session_state.current_audio = audio_bytes
+                st.session_state.show_results = True
                 st.session_state.new_recording = True
+                
+                # Rerun to show results
                 st.rerun()
                 
             except Exception as e:
                 logger.error(f"Error processing audio: {str(e)}", exc_info=True)
                 st.error(f"Error processing audio: {str(e)}")
         else:
-            # Reset the recording flag after rerun
+            # Only reset the recording flag, keep the results
             st.session_state.new_recording = False
 
 if __name__ == "__main__":
