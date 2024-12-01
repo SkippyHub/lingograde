@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Request, Depends, HTTPException
+from fastapi import FastAPI, UploadFile, File, Request, Depends, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from .auth import create_access_token, get_current_user, User, Token
@@ -53,6 +53,7 @@ class UserCreate(BaseModel):
 @app.post("/api/analyze-audio")
 async def analyze_audio(
     audio: UploadFile = File(...),
+    prompt: str = Form(...),
     current_user: User = Depends(get_current_user)
 ):
     logger.debug(f"Received audio file: {audio.filename}")
@@ -62,6 +63,12 @@ async def analyze_audio(
     result = model.predict(audio_bytes)
     logger.debug(f"Model prediction result: {result}")
     
+    # Get detailed grading for the transcription
+    grading_result = model.grade_response(
+        prompt,
+        result.get('transcription', '')
+    )
+    
     # Save to storage and database using current user's username
     filename = f"recording_{uuid.uuid4()}.wav"
     storage_manager.save_recording(user_id=current_user.username, audio_data=audio_bytes, filename=filename)
@@ -70,8 +77,13 @@ async def analyze_audio(
         filename=filename,
         transcription=result.get('transcription'),
         model_response=json.dumps(result),
-        grades=result.get('grades', {})
+        prompt=prompt,
+        grades=result.get('grades', {}),
+        grading_result=grading_result
     )
+    
+    # Add grading details to the response
+    result['grading_details'] = grading_result
     
     logger.debug(f"Returning result: {result}")
     return result

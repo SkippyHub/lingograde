@@ -31,11 +31,14 @@ class DatabaseManager:
                 transcription TEXT,
                 model_response TEXT,
                 metadata TEXT,
+                prompt TEXT,
                 pronunciation_grade FLOAT,
                 fluency_grade FLOAT,
                 coherence_grade FLOAT,
                 grammar_grade FLOAT,
-                vocabulary_grade FLOAT
+                vocabulary_grade FLOAT,
+                grading_explanation TEXT,
+                grading_notes TEXT
             )
         ''')
         
@@ -65,7 +68,7 @@ class DatabaseManager:
         self.conn.commit()
 
     def save_recording(self, user_id, filename, duration=None, transcription=None, 
-                      model_response=None, metadata=None, grades=None):
+                      model_response=None, metadata=None, prompt=None, grades=None, grading_result=None):
         c = self.conn.cursor()
         
         # Extract grades or use defaults
@@ -76,13 +79,20 @@ class DatabaseManager:
         grammar = grades.get('grammar', 0.0)
         vocabulary = grades.get('vocabulary', 0.0)
         
+        # Extract grading details
+        grading_result = grading_result or {}
+        explanation = grading_result.get('explanation', '')
+        notes = grading_result.get('notes', '')
+        
         c.execute('''
             INSERT INTO recordings 
             (user_id, filename, timestamp, duration, transcription, model_response, metadata,
-             pronunciation_grade, fluency_grade, coherence_grade, grammar_grade, vocabulary_grade)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             prompt, pronunciation_grade, fluency_grade, coherence_grade, grammar_grade, vocabulary_grade,
+             grading_explanation, grading_notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (user_id, filename, datetime.now(), duration, transcription, 
-              model_response, metadata, pronunciation, fluency, coherence, grammar, vocabulary))
+              model_response, metadata, prompt, pronunciation, fluency, coherence, grammar, vocabulary,
+              explanation, notes))
         
         self.conn.commit()
 
@@ -95,8 +105,9 @@ class DatabaseManager:
         
         # Convert to list of dicts with properly formatted timestamps
         columns = ['id', 'user_id', 'filename', 'timestamp', 'duration', 'transcription', 
-                  'model_response', 'metadata', 'pronunciation_grade', 'fluency_grade', 
-                  'coherence_grade', 'grammar_grade', 'vocabulary_grade']
+                  'model_response', 'metadata', 'prompt', 'pronunciation_grade', 'fluency_grade', 
+                  'coherence_grade', 'grammar_grade', 'vocabulary_grade', 'grading_explanation', 
+                  'grading_notes']
         
         formatted_recordings = []
         for recording in recordings:

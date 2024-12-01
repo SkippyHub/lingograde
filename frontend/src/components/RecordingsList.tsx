@@ -195,33 +195,116 @@ export const RecordingsList: React.FC<Props> = ({
                   {/* Speech Content Section */}
                   <div className="space-y-4 mt-4">
                     {recording.transcription && (
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Your Speech:</h4>
-                        <p className="text-gray-900">{recording.transcription}</p>
+                      <div className="space-y-4">
+                        <div className="bg-indigo-50/50 p-4 rounded-lg">
+                          <h4 className="text-sm font-medium text-indigo-800 mb-2">Speaking Prompt:</h4>
+                          <p className="text-indigo-900">{recording.prompt || "No prompt recorded"}</p>
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">Your Speech:</h4>
+                          <p className="text-gray-900">{recording.transcription}</p>
+                        </div>
                       </div>
                     )}
 
                     {recording.model_response && (
                       <div className="bg-indigo-50 p-4 rounded-lg space-y-4">
-                        <h4 className="text-sm font-medium text-indigo-800">Recording Feedback:</h4>
+                        <h4 className="text-sm font-medium text-indigo-800">AI Feedback:</h4>
                         {(() => {
                           try {
                             const response = JSON.parse(recording.model_response);
                             return (
-                              <>
+                              <div className="space-y-4">
+                                {/* Transcription */}
                                 {response.transcription && (
                                   <div>
-                                    <span className="text-xs font-medium text-indigo-700">Transcription:</span>
+                                    <span className="text-xs font-medium text-indigo-700">Your Speech:</span>
                                     <p className="text-sm text-indigo-900 mt-1">{response.transcription}</p>
                                   </div>
                                 )}
-                                {response.feedback && (
-                                  <div>
-                                    <span className="text-xs font-medium text-indigo-700">Feedback:</span>
-                                    <p className="text-sm text-indigo-900 mt-1">{response.feedback}</p>
+
+                                {/* Grading Details */}
+                                {response.grading_details && (
+                                  <div className="bg-white/50 p-3 rounded-md space-y-2">
+                                    <span className="text-xs font-medium text-indigo-700">Detailed Analysis:</span>
+                                    {recording.grading_explanation && (
+                                      <p className="text-sm text-indigo-900">{recording.grading_explanation}</p>
+                                    )}
+                                    {recording.grading_notes && (
+                                      <div className="mt-2">
+                                        <span className="text-xs font-medium text-indigo-700">Additional Notes:</span>
+                                        <p className="text-sm text-indigo-900 mt-1">{recording.grading_notes}</p>
+                                      </div>
+                                    )}
                                   </div>
                                 )}
-                              </>
+
+                                {/* Grades Visualization remains the same */}
+                                <div className="mt-4">
+                                  <span className="text-xs font-medium text-indigo-700">Performance Metrics:</span>
+                                  <div className="grid grid-cols-2 gap-2 mt-2">
+                                    {Object.entries({
+                                      Pronunciation: recording.pronunciation_grade,
+                                      Fluency: recording.fluency_grade,
+                                      Coherence: recording.coherence_grade,
+                                      Grammar: recording.grammar_grade,
+                                      Vocabulary: recording.vocabulary_grade
+                                    }).map(([key, value]) => (
+                                      <div key={key} className="bg-white/50 p-2 rounded">
+                                        <span className="text-xs text-indigo-700">{key}:</span>
+                                        <div className="flex items-center">
+                                          <div className="flex-grow bg-gray-200 h-2 rounded-full">
+                                            <div 
+                                              className="bg-indigo-600 h-2 rounded-full" 
+                                              style={{ width: `${(value || 0) * 100}%` }}
+                                            />
+                                          </div>
+                                          <span className="ml-2 text-xs text-indigo-900">
+                                            {Math.round((value || 0) * 100)}%
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* AI Response */}
+                                {response.response && (
+                                  <div className="mt-4">
+                                    <span className="text-xs font-medium text-indigo-700">AI Response:</span>
+                                    {(() => {
+                                      try {
+                                        // Try to parse if response is a JSON string
+                                        const parsedResponse = typeof response.response === 'string' && 
+                                          response.response.startsWith('```json') ? 
+                                          JSON.parse(response.response.replace(/```json|```/g, '').trim()) :
+                                          { response: response.response };
+
+                                        return (
+                                          <div className="space-y-2">
+                                            <p className="text-sm text-indigo-900 mt-1">
+                                              {parsedResponse.response}
+                                            </p>
+                                            {parsedResponse.confidence && (
+                                              <div className="text-xs text-indigo-600">
+                                                Confidence: {Math.round(parsedResponse.confidence * 100)}%
+                                              </div>
+                                            )}
+                                            {parsedResponse.sentiment && (
+                                              <div className="text-xs text-indigo-600">
+                                                Sentiment: {parsedResponse.sentiment}
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      } catch (e) {
+                                        // Fallback to displaying raw response
+                                        return <p className="text-sm text-indigo-900 mt-1">{response.response}</p>;
+                                      }
+                                    })()}
+                                  </div>
+                                )}
+                              </div>
                             );
                           } catch (e) {
                             return <p className="text-sm text-indigo-900">{recording.model_response}</p>;

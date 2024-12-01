@@ -6,6 +6,17 @@ import { useAuth } from '../contexts/AuthContext';
 import { Recording } from '../types';
 import { Link } from 'react-router-dom';
 
+const SPEAKING_PROMPTS = [
+  "Describe your ideal vacation destination and explain why you would choose to visit that place.",
+  "What is your favorite hobby and why do you enjoy it?",
+  "Tell me about a memorable experience from your childhood.",
+  "If you could have dinner with any historical figure, who would it be and why?",
+  "What do you think will be the most significant technological advancement in the next 10 years?",
+  "Describe a challenge you've overcome and what you learned from it.",
+  "What advice would you give to someone learning a new language?",
+  "If you could instantly master any skill, what would it be and why?",
+];
+
 export const Dashboard: React.FC = () => {
   const { logout } = useAuth();
   const [recordings, setRecordings] = useState<Recording[]>([]);
@@ -13,6 +24,7 @@ export const Dashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [recordingError, setRecordingError] = useState<string | null>(null);
   const api = useApi();
+  const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
 
   useEffect(() => {
     checkApiAndLoadRecordings();
@@ -36,12 +48,16 @@ export const Dashboard: React.FC = () => {
     try {
       setError(null);
       setRecordingError(null);
-      await api.analyzeAudio(audioBlob);
+      await api.analyzeAudio(audioBlob, SPEAKING_PROMPTS[currentPromptIndex]);
       await checkApiAndLoadRecordings();
     } catch (error) {
       console.error('Failed to analyze audio:', error);
       setRecordingError('Unable to record audio. Please check your microphone permissions and try again.');
     }
+  };
+
+  const getNextPrompt = () => {
+    setCurrentPromptIndex((prev) => (prev + 1) % SPEAKING_PROMPTS.length);
   };
 
   return (
@@ -124,8 +140,17 @@ export const Dashboard: React.FC = () => {
                       <div>
                         <h3 className="text-sm font-medium text-indigo-800">Speaking Prompt:</h3>
                         <p className="text-sm text-indigo-600 mt-1">
-                          "Describe your ideal vacation destination and explain why you would choose to visit that place."
+                          "{SPEAKING_PROMPTS[currentPromptIndex]}"
                         </p>
+                        <button
+                          onClick={getNextPrompt}
+                          className="mt-2 text-xs text-indigo-500 hover:text-indigo-600 flex items-center"
+                        >
+                          <span>Next prompt</span>
+                          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </button>
                       </div>
                     </div>
                   </div>

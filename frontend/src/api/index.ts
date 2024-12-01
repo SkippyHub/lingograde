@@ -2,7 +2,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 interface Api {
   getRecordings: () => Promise<any>;
-  analyzeAudio: (audioBlob: Blob) => Promise<any>;
+  analyzeAudio: (audioBlob: Blob, prompt: string) => Promise<any>;
   getRecordingAudio: (filename: string) => Promise<Blob>;
   delete: (path: string) => Promise<any>;
   get: (path: string) => Promise<any>;
@@ -23,9 +23,10 @@ export const useApi = () => {
     return response.json();
   };
 
-  const analyzeAudio = async (audioBlob: Blob) => {
+  const analyzeAudio = async (audioBlob: Blob, prompt: string) => {
     const formData = new FormData();
     formData.append('audio', audioBlob);
+    formData.append('prompt', prompt);
 
     const response = await fetch(`/api/analyze-audio`, {
       method: 'POST',

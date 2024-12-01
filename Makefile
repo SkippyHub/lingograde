@@ -2,7 +2,7 @@
 ENV ?= development
 
 # Main run commands
-.PHONY: run run-prod install clean frontend-install frontend-dev api dev
+.PHONY: run run-prod install clean frontend-install frontend-dev api dev lock
 
 # Setup environment
 setup-env:
@@ -58,3 +58,6 @@ clean:
 # Add a new target for complete cleanup if needed
 clean-all: clean
 	rm -rf .venv
+
+lock:
+	poetry lock --no-update
