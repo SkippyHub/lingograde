@@ -8,6 +8,8 @@ env:
   PROJECT_ID: silent-cider-443411-i4
   SERVICE_NAME: lingograde
   REGION: us-central1
+  CLOUD_RUN_SERVICE: lingograde-api
+  GCP_SA_EMAIL: github-actions@silent-cider-443411-i4.iam.gserviceaccount.com
 
 jobs:
   deploy:
