@@ -14,11 +14,11 @@ python-dotenv = "^1.0.1"
 python-multipart = "^0.0.18"
 numpy = "^1.26.0"
 pandas = "^2.2.0"
-soundfile = "^0.12.1"
 plotly = "^5.18.0"
 clerk-backend-api = "^1.4.0"
 firebase-admin = "^6.6.0"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+bcrypt = "^4.2.1"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 
 [tool.poetry.group.dev.dependencies]
