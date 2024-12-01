@@ -37,6 +37,11 @@ ENV/
 .env.*
 !.env.example
 
+# Remove old env files
+frontend/.env
+frontend/.env.local
+app/.env
+
 # Logs
 *.log
 
@@ -57,4 +62,13 @@ app/database/recordings.db
 frontend/node_modules/*
 frontend/dist/*
 frontend/build/*
+
+app/frontend/node_modules/*
+app/frontend/dist/*
+app/frontend/build/*
+
+# Environment files
+.env
+.env.local
+.env.*.local
 

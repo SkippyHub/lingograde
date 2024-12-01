@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "lingograde"
+version = "0.1.0"
+description = "A speech grading application"
+authors = ["Marlon"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.5"
+uvicorn = "^0.32.1"
+python-dotenv = "^1.0.1"
+python-multipart = "^0.0.18"
+numpy = "^1.26.0"
+pandas = "^2.2.0"
+soundfile = "^0.12.1"
+plotly = "^5.18.0"
+clerk-backend-api = "^1.4.0"
+firebase-admin = "^6.6.0"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1.1"
+black = "^24.2.0"
+flake8 = "^7.0.0"
+mypy = "^1.9.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+include = '\.pyi?$'
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

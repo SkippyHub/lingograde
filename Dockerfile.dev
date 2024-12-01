@@ -27,7 +27,8 @@ ENV STREAMLIT_SERVER_RUN_ON_SAVE=true
 VOLUME /app
 
 EXPOSE 8501
-EXPOSE 5678  # For debugger
+EXPOSE 5678  
+# For debugger
 
 # Add debugging script
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
