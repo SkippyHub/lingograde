@@ -1,27 +1,29 @@
-FROM python:3.11-slim
+# Build frontend
+FROM node:18 AS frontend-builder
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ .
+RUN npm run build
 
+# Build backend
+FROM python:3.11-slim
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    ffmpeg \
-    pkg-config \
-    portaudio19-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Copy frontend build
+COPY --from=frontend-builder /app/frontend/dist /app/frontend/dist
 
-# Copy only requirements first to leverage Docker cache
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install backend dependencies
+COPY pyproject.toml poetry.lock ./
+RUN pip install poetry && \
+    poetry config virtualenvs.create false && \
+    poetry install --no-dev
 
 # Copy application code
 COPY . .
 
-# Create necessary directories with correct permissions
-RUN mkdir -p app/storage/recordings && \
-    chmod -R 777 app/storage
+# Set environment variables
+ENV PORT=8080
 
-EXPOSE 8501
-
-HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
-
-CMD ["streamlit", "run", "app/main.py", "--server.address", "0.0.0.0"]
+# Run the application
+CMD ["poetry", "run", "uvicorn", "app.api.main:app", "--host", "0.0.0.0", "--port", "8080"]
