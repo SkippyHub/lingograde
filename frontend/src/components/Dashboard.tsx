@@ -4,6 +4,7 @@ import { RecordingsList } from './RecordingsList';
 import { useApi } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import { Recording } from '../types';
+import { Link } from 'react-router-dom';
 
 export const Dashboard: React.FC = () => {
   const { logout } = useAuth();
@@ -48,16 +49,18 @@ export const Dashboard: React.FC = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-100/90 via-white/50 to-orange-100/70 pointer-events-none" />
       <div className="relative">
         <nav className="bg-white/70 backdrop-blur-sm shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <h1 className="text-3xl font-extrabold text-gray-900">
-              <span className="text-indigo-600">LingoGrade</span>
-            </h1>
-            <button
-              onClick={logout}
-              className="px-8 py-3 text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 border border-indigo-600"
-            >
-              Logout
-            </button>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex justify-between items-center">
+              <Link to="/" className="text-3xl font-extrabold text-gray-900">
+                <span className="text-indigo-600">LingoGrade</span>
+              </Link>
+              <button
+                onClick={logout}
+                className="px-8 py-3 text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 border border-indigo-600"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </nav>
 

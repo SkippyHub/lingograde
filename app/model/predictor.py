@@ -1,20 +1,27 @@
 import time
 from typing import Union, Dict, Any
 import random
+import whisper
+import tempfile
+from google.cloud import speech
+import io
+import deepspeech
+import numpy as np
 
 # import gemma 
 
 class AIModel:
     def __init__(self):
         self.loaded = False
-        self._load_model()
-    
-    def _load_model(self) -> None:
-        """Simulate loading a model"""
-        print("Loading AI model...")
-        time.sleep(1)  # Simulate loading time
+        self.model = whisper.load_model("base")  # Options: tiny, base, small, medium, large
+        self.client = speech.SpeechClient()
+        # Download these files from Mozilla's DeepSpeech releases
+        model_path = "path/to/deepspeech-0.9.3-models.pbmm"
+        scorer_path = "path/to/deepspeech-0.9.3-models.scorer"
+        
+        self.model = deepspeech.Model(model_path)
+        self.model.enableExternalScorer(scorer_path)
         self.loaded = True
-        print("Model loaded successfully!")
     
     def preprocess_audio(self, audio_bytes: bytes) -> Dict[str, Any]:
         """Simulate audio preprocessing"""
@@ -26,16 +33,17 @@ class AIModel:
         }
     
     def transcribe_audio(self, processed_data: Dict[str, Any]) -> str:
-        """Simulate transcription"""
-        # In reality, this would use a speech-to-text model
-        
-        dummy_responses = [
-            "Hello, how can I help you today?",
-            "I'd like to schedule an appointment.",
-            "Could you please explain that again?",
-            "Thank you for your assistance."
-        ]
-        return random.choice(dummy_responses)
+        """Transcribe audio using DeepSpeech"""
+        try:
+            # Convert audio bytes to numpy array
+            audio_data = np.frombuffer(processed_data["processed_data"], np.int16)
+            
+            # Perform transcription
+            text = self.model.stt(audio_data)
+            return text
+        except Exception as e:
+            print(f"Transcription error: {str(e)}")
+            raise
     
     def generate_response(self, text: str) -> Dict[str, Any]:
         """Simulate AI response generation"""
