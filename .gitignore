@@ -75,3 +75,4 @@ app/frontend/build/*
 # Google Cloud credentials
 *credentials.json
 
+app/database/recordings.db

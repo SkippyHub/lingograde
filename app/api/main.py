@@ -78,8 +78,7 @@ async def analyze_audio(
         transcription=result.get('transcription'),
         model_response=json.dumps(result),
         prompt=prompt,
-        grades=result.get('grades', {}),
-        grading_result=grading_result
+        grading_result=result.get('grading_details', {})
     )
     
     # Add grading details to the response

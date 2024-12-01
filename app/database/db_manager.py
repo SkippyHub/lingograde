@@ -71,16 +71,15 @@ class DatabaseManager:
                       model_response=None, metadata=None, prompt=None, grades=None, grading_result=None):
         c = self.conn.cursor()
         
-        # Extract grades or use defaults
-        grades = grades or {}
-        pronunciation = grades.get('pronunciation', 0.0)
-        fluency = grades.get('fluency', 0.0)
-        coherence = grades.get('coherence', 0.0)
-        grammar = grades.get('grammar', 0.0)
-        vocabulary = grades.get('vocabulary', 0.0)
+        # Extract grades from grading_result
+        grading_result = grading_result or {}
+        coherence = grading_result.get('coherence', 0.0)
+        grammar = grading_result.get('grammar', 0.0)
+        vocabulary = grading_result.get('vocabulary', 0.0)
+        pronunciation = 0.0  # These could be added later if needed
+        fluency = 0.0
         
         # Extract grading details
-        grading_result = grading_result or {}
         explanation = grading_result.get('explanation', '')
         notes = grading_result.get('notes', '')
         
