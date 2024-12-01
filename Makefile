@@ -61,3 +61,32 @@ clean-all: clean
 
 lock:
 	poetry lock --no-update
+
+docker-build:
+	docker build -t lingograde .
+
+docker-run:
+	docker run -p 80:80 -p 8000:8000 \
+		-e GOOGLE_CLOUD_PROJECT=silent-cider-443411-i4 \
+		-e GOOGLE_CLOUD_REGION=us-central1 \
+		-v $(PWD)/lingograde-stt-credentials.json:/app/lingograde-stt-credentials.json \
+		lingograde
+
+# Add a new development target
+docker-run-dev:
+	docker run -p 3000:3000 -p 8000:8000 \
+		-e GOOGLE_CLOUD_PROJECT=silent-cider-443411-i4 \
+		-e GOOGLE_CLOUD_REGION=us-central1 \
+		-v $(PWD):/app \
+		lingograde-dev npm run dev
+
+# Add these new targets
+docker-build-dev:
+	docker build -t lingograde-dev -f Dockerfile.dev .
+
+docker-run-dev: docker-build-dev
+	docker run -p 3000:3000 -p 8000:8000 \
+		-e GOOGLE_CLOUD_PROJECT=silent-cider-443411-i4 \
+		-e GOOGLE_CLOUD_REGION=us-central1 \
+		-v $(PWD):/app \
+		lingograde-dev

@@ -1,6 +1,6 @@
 import { useAuth } from '../contexts/AuthContext';
 
-interface Api {
+export interface Api {
   getRecordings: () => Promise<any>;
   analyzeAudio: (audioBlob: Blob, prompt: string) => Promise<any>;
   getRecordingAudio: (filename: string) => Promise<Blob>;

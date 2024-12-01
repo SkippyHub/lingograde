@@ -1,6 +1,8 @@
 # Build frontend
 FROM node:18 AS frontend-builder
 WORKDIR /app/frontend
+
+# Install dependencies and build
 COPY frontend/package*.json ./
 RUN npm install
 COPY frontend/ .
@@ -10,8 +12,14 @@ RUN npm run build
 FROM python:3.11-slim
 WORKDIR /app
 
-# Copy frontend build
-COPY --from=frontend-builder /app/frontend/dist /app/frontend/dist
+# Install nginx
+RUN apt-get update && apt-get install -y nginx
+
+# Copy nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy frontend build to nginx's serve directory
+COPY --from=frontend-builder /app/frontend/dist/* /usr/share/nginx/html/
 
 # Install backend dependencies
 COPY pyproject.toml poetry.lock ./
@@ -23,7 +31,7 @@ RUN pip install poetry && \
 COPY . .
 
 # Set environment variables
-ENV PORT=8080
+ENV PORT=8000
 
-# Run the application
-CMD ["poetry", "run", "uvicorn", "app.api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Start both nginx and uvicorn
+CMD service nginx start && poetry run uvicorn app.api.main:app --host 0.0.0.0 --port 8000
