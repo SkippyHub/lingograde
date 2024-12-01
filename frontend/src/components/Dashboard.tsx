@@ -83,8 +83,9 @@ export const Dashboard: React.FC = () => {
         )}
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Recording List Section - Full width on small/medium, 2/3 on large */}
+            <div className="order-2 lg:order-1 lg:col-span-2">
               {isLoading ? (
                 <div className="bg-white rounded-lg shadow px-6 py-8">
                   <div className="animate-pulse flex space-x-4">
@@ -105,7 +106,9 @@ export const Dashboard: React.FC = () => {
                 />
               )}
             </div>
-            <div className="lg:col-span-1">
+
+            {/* Recording Section - Full width on small/medium, 1/3 on large */}
+            <div className="order-1 lg:order-2 lg:col-span-1">
               <div className="bg-white rounded-lg shadow px-6 pb-8 pt-8">
                 <div className="relative">
                   <div className="absolute -top-10 left-6">
