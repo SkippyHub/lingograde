@@ -72,3 +72,6 @@ app/frontend/build/*
 .env.local
 .env.*.local
 
+# Google Cloud credentials
+*credentials.json
+

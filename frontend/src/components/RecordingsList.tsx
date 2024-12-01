@@ -55,14 +55,6 @@ export const RecordingsList: React.FC<Props> = ({
     }
   };
 
-  const parseModelResponse = (response: string | null) => {
-    if (!response) return null;
-    try {
-      return JSON.parse(response);
-    } catch (error) {
-      return null;
-    }
-  };
 
   const fetchAudio = async (filename: string) => {
     try {

@@ -1,46 +1,102 @@
+import os
+from dotenv import load_dotenv
 import time
 from typing import Union, Dict, Any
 import random
-import whisper
-import tempfile
 from google.cloud import speech
 import io
-import deepspeech
-import numpy as np
 
-# import gemma 
+# Load environment variables
+load_dotenv()
+
+# Now you can access the variables like this:
+project_id = os.getenv('GOOGLE_CLOUD_PROJECT_ID')
+api_key = os.getenv('GOOGLE_CLOUD_API_KEY')
+
+print("\n=== Google Cloud Speech-to-Text Configuration ===")
+print(f"Project ID: {project_id}")
+print(f"Credentials file: {os.getenv('GOOGLE_APPLICATION_CREDENTIALS')}")
+print("=============================================\n")
 
 class AIModel:
     def __init__(self):
         self.loaded = False
-        self.model = whisper.load_model("base")  # Options: tiny, base, small, medium, large
-        self.client = speech.SpeechClient()
-        # Download these files from Mozilla's DeepSpeech releases
-        model_path = "path/to/deepspeech-0.9.3-models.pbmm"
-        scorer_path = "path/to/deepspeech-0.9.3-models.scorer"
-        
-        self.model = deepspeech.Model(model_path)
-        self.model.enableExternalScorer(scorer_path)
-        self.loaded = True
+        try:
+            # Initialize the Speech-to-Text client
+            print("\n Initializing Google Cloud Speech-to-Text client...")
+            self.client = speech.SpeechClient()
+            self.loaded = True
+            print("✅ Google Cloud Speech client initialized successfully!")
+            print("=============================================\n")
+        except Exception as e:
+            print("\n❌ Error initializing Speech client:")
+            print(f"Error details: {str(e)}")
+            print("=============================================\n")
+            raise
     
     def preprocess_audio(self, audio_bytes: bytes) -> Dict[str, Any]:
-        """Simulate audio preprocessing"""
-        
-        return {
-            "processed_data": audio_bytes[:100],  # Just take first 100 bytes for demo
-            "sample_rate": 16000,
-            "duration": len(audio_bytes) / 16000  # Dummy duration calculation
-        }
+        """Process audio for Google Cloud Speech-to-Text"""
+        try:
+            print("\n🎵 Processing audio...")
+            print(f"Audio size: {len(audio_bytes)} bytes")
+            
+            # Convert the audio bytes to proper format if needed
+            audio = speech.RecognitionAudio(content=audio_bytes)
+            
+            # Define the recognition config with the correct sample rate
+            config = speech.RecognitionConfig(
+                encoding=speech.RecognitionConfig.AudioEncoding.WEBM_OPUS,
+                sample_rate_hertz=48000,
+                language_code="en-US",
+                enable_automatic_punctuation=True,
+                use_enhanced=True,
+                model="default"
+            )
+            
+            print("✅ Audio preprocessing complete")
+            print(f"Sample rate: 48000 Hz")
+            print(f"Encoding: WEBM_OPUS")
+            print("=============================================\n")
+            
+            return {
+                "audio": audio,
+                "config": config,
+                "duration": len(audio_bytes) / 48000
+            }
+        except Exception as e:
+            print("\n❌ Error in preprocessing:")
+            print(f"Error details: {str(e)}")
+            print("=============================================\n")
+            raise
     
     def transcribe_audio(self, processed_data: Dict[str, Any]) -> str:
-        """Transcribe audio using DeepSpeech"""
+        """Transcribe audio using Google Cloud Speech-to-Text"""
         try:
-            # Convert audio bytes to numpy array
-            audio_data = np.frombuffer(processed_data["processed_data"], np.int16)
+            # Get the audio and config from processed data
+            audio = processed_data.get("audio")
+            config = processed_data.get("config")
             
-            # Perform transcription
-            text = self.model.stt(audio_data)
-            return text
+            if not audio or not config:
+                raise ValueError("Missing audio or config in processed data")
+            
+            # Perform the transcription
+            print("Starting transcription...")
+            response = self.client.recognize(config=config, audio=audio)
+            
+            # Process the response
+            transcript = ""
+            for result in response.results:
+                alternative = result.alternatives[0]
+                transcript += alternative.transcript + " "
+                print(f"Confidence: {alternative.confidence}")
+                
+            if not transcript:
+                print("No transcription result")
+                return "Could not transcribe audio"
+                
+            print(f"Transcription completed: {transcript.strip()}")
+            return transcript.strip()
+            
         except Exception as e:
             print(f"Transcription error: {str(e)}")
             raise
@@ -101,8 +157,6 @@ class AIModel:
         if not self.loaded:
             raise RuntimeError("Model not loaded")
         
-        
-    
         try:
             # Process audio
             processed_data = self.preprocess_audio(audio_bytes)
@@ -130,6 +184,7 @@ class AIModel:
             }
             
         except Exception as e:
+            print(f"Prediction error: {str(e)}")
             return {
                 "status": "error",
                 "error": str(e),

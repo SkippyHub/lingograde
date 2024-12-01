@@ -68,6 +68,7 @@ async def analyze_audio(
     db_manager.save_recording(
         user_id=current_user.username,
         filename=filename,
+        transcription=result.get('transcription'),
         model_response=json.dumps(result),
         grades=result.get('grades', {})
     )

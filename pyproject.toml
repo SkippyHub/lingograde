@@ -20,7 +20,7 @@ firebase-admin = "^6.6.0"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 bcrypt = "^4.2.1"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-openai-whisper = "^20231117"
+google-cloud-speech = {version = "^2.24.1", extras = []}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
