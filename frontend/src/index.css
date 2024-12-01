@@ -34,6 +34,10 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .app {
@@ -62,4 +66,42 @@ body {
 
 .audio-controls audio {
   flex: 1;
+}
+
+[data-recording="true"] ~ .recording {
+  transform: scale(1);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.recording {
+  animation: pulse 2s infinite;
+}
+
+@keyframes gradient-wave {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animated-gradient {
+  background: linear-gradient(
+    -45deg,
+    #ffffff,
+    #e0e7ff,
+    #fff7ed,
+    #ffffff
+  );
+  background-size: 400% 400%;
+  animation: gradient-wave 15s ease infinite;
 } 

@@ -29,23 +29,36 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
-      {isAuthenticated ? (
-        <>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/recordings" element={<RecordingsList 
-            recordings={recordings}
-            onAudioRequest={handleAudioRequest}
-            onRecordingsUpdate={handleRecordingsUpdate}
-          />} />
-        </>
-      ) : (
-        <>
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </>
-      )}
+      <Route 
+        path="/login" 
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} 
+      />
+      <Route 
+        path="/signup" 
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Signup />} 
+      />
+      <Route 
+        path="/dashboard" 
+        element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/recordings" 
+        element={
+          isAuthenticated ? (
+            <RecordingsList 
+              recordings={recordings}
+              onAudioRequest={handleAudioRequest}
+              onRecordingsUpdate={handleRecordingsUpdate}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        } 
+      />
+      <Route 
+        path="*" 
+        element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} 
+      />
     </Routes>
   );
 } 

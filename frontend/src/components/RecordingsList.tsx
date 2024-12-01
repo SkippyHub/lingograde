@@ -172,6 +172,20 @@ export const RecordingsList: React.FC<Props> = ({
                       {isDeleting[recording.id] ? 'Deleting...' : 'Delete'}
                     </button>
                   </div>
+
+                  {/* Star Graph - Moved to top */}
+                  {(recording.pronunciation_grade || recording.fluency_grade || 
+                    recording.coherence_grade || recording.grammar_grade || 
+                    recording.vocabulary_grade) && (
+                    <div className="mb-6">
+                      <h4 className="font-medium text-gray-900 mb-4">Performance Analysis</h4>
+                      <div className="flex justify-center">
+                        <div className="w-64 h-64"> {/* Fixed size and centered */}
+                          <Radar data={getGradeData(recording)} options={chartOptions} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Audio Playback */}
                   {audioUrls[recording.filename] && (
@@ -186,24 +200,44 @@ export const RecordingsList: React.FC<Props> = ({
                     </div>
                   )}
 
-                  {recording.transcription && (
-                    <div className="mb-4">
-                      <span className="text-gray-400">Transcription: </span>
-                      <span className="font-medium text-white">{recording.transcription}</span>
-                    </div>
-                  )}
-
-                  {/* Star Graph */}
-                  {(recording.pronunciation_grade || recording.fluency_grade || 
-                    recording.coherence_grade || recording.grammar_grade || 
-                    recording.vocabulary_grade) && (
-                    <div className="mt-4">
-                      <h4 className="font-medium text-white mb-2">Performance Analysis</h4>
-                      <div className="w-full max-w-md mx-auto h-64">
-                        <Radar data={getGradeData(recording)} options={chartOptions} />
+                  {/* Speech Content Section */}
+                  <div className="space-y-4 mt-4">
+                    {recording.transcription && (
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">Your Speech:</h4>
+                        <p className="text-gray-900">{recording.transcription}</p>
                       </div>
-                    </div>
-                  )}
+                    )}
+
+                    {recording.model_response && (
+                      <div className="bg-indigo-50 p-4 rounded-lg space-y-4">
+                        <h4 className="text-sm font-medium text-indigo-800">Recording Feedback:</h4>
+                        {(() => {
+                          try {
+                            const response = JSON.parse(recording.model_response);
+                            return (
+                              <>
+                                {response.transcription && (
+                                  <div>
+                                    <span className="text-xs font-medium text-indigo-700">Transcription:</span>
+                                    <p className="text-sm text-indigo-900 mt-1">{response.transcription}</p>
+                                  </div>
+                                )}
+                                {response.feedback && (
+                                  <div>
+                                    <span className="text-xs font-medium text-indigo-700">Feedback:</span>
+                                    <p className="text-sm text-indigo-900 mt-1">{response.feedback}</p>
+                                  </div>
+                                )}
+                              </>
+                            );
+                          } catch (e) {
+                            return <p className="text-sm text-indigo-900">{recording.model_response}</p>;
+                          }
+                        })()}
+                      </div>
+                    )}
+                  </div>
                 </li>
               );
             })}

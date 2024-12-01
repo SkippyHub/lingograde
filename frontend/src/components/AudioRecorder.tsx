@@ -36,11 +36,18 @@ export const AudioRecorder: React.FC<Props> = ({ onRecordingComplete }) => {
   };
 
   return (
-    <button 
-      onClick={isRecording ? stopRecording : startRecording}
-      className={`btn ${isRecording ? 'btn-secondary' : 'btn-primary'}`}
-    >
-      {isRecording ? 'Stop Recording' : 'Start Recording'}
-    </button>
+    <div className="flex flex-col items-center gap-4">
+      <button
+        onClick={isRecording ? stopRecording : startRecording}
+        className={`mt-4 px-6 py-3 rounded-full font-medium text-white transition-colors ${
+          isRecording 
+            ? 'bg-red-500 hover:bg-red-600' 
+            : 'bg-indigo-500 hover:bg-indigo-600'
+        }`}
+        data-recording={isRecording}
+      >
+        {isRecording ? 'Stop Recording' : 'Start Recording'}
+      </button>
+    </div>
   );
 }; 
