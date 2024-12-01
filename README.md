@@ -1,6 +1,45 @@
 # lingograde
 lingo grade, grades your speech, identifies issues, and enhances language skills to become a native speaker.
 
+## Quick Start
+
+### Development Setup
+
+1. Using Docker (Recommended):
+```bash
+# Build development image
+make docker-build-dev
+
+# Run development environment
+make docker-run-dev
+```
+This will start:
+- Frontend dev server at http://localhost:3000
+- Backend API at http://localhost:8000
+
+2. Local Development:
+```bash
+# Install dependencies
+make install
+
+# Run development servers
+make run
+```
+
+### Production Setup
+
+1. Using Docker:
+```bash
+# Build production image
+make docker-build
+
+# Run production environment
+make docker-run
+```
+This will start:
+- Frontend at http://localhost
+- Backend API at http://localhost:8000
+
 ## Architecture
 
 ### Component Overview
@@ -233,7 +272,53 @@ Access the application at http://localhost:8501
 
 ## Development
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines.
+### Docker Development Environment
+
+The development environment uses:
+- Hot reloading for both frontend and backend
+- Volume mounting for live code updates
+- Python 3.11 with Poetry for dependency management
+- Node.js 18 with npm for frontend development
+- Vite for frontend development server
+
+### Environment Variables
+
+Development environment variables are set in:
+- `.env` for backend
+- `frontend/.env` for frontend
+
+Required environment variables:
+```bash
+GOOGLE_CLOUD_PROJECT=your-project-id
+GOOGLE_CLOUD_REGION=your-region
+```
+
+### Available Make Commands
+
+use make and install, you need 
+
+```bash
+# Development (experimental)
+make docker-build-dev    # Build development Docker image
+make docker-run-dev      # Run development environment
+
+make install            # Install dependencies locally
+make run               # Run locally without Docker
+
+
+make frontend-dev      # Run frontend development server
+make api              # Run API development server
+
+# Production 
+make docker-build      # Build production Docker image
+make docker-run       # Run production environment
+make run-prod         # Run production locally
+
+# Utilities
+make clean            # Clean build artifacts
+make lint             # Run linters
+make test             # Run tests
+```
 
 ## Deployment
 
@@ -242,5 +327,52 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines.
 docker build -t lingograde .
 docker run -p 8501:8501 lingograde
 ```
+
+### Google Cloud Setup
+
+1. **Create a Project**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com)
+   - Create a new project or select an existing one
+   - Note your `PROJECT_ID` and `REGION`
+
+2. **Enable Required APIs**:
+   ```bash
+   # Enable Speech-to-Text API
+   gcloud services enable speech.googleapis.com
+   
+   # Enable Cloud Run (if using deployment)
+   gcloud services enable run.googleapis.com
+   ```
+
+3. **Set up Service Account**:
+   - Go to IAM & Admin > Service Accounts
+   - Create a new service account
+   - Add roles:
+     - `Speech-to-Text User`
+     - `Cloud Run Admin` (for deployment)
+   - Create and download JSON key
+   - Rename and move the key:
+   ```bash
+   mv downloaded-key.json lingograde-stt-credentials.json
+   ```
+
+4. **Configure Environment**:
+   ```bash
+   # Add to your .env file
+   GOOGLE_CLOUD_PROJECT=your-project-id
+   GOOGLE_CLOUD_REGION=your-region
+   
+   # For local development
+   GOOGLE_APPLICATION_CREDENTIALS=./lingograde-stt-credentials.json
+   ```
+
+5. **For GitHub Actions Deployment**:
+   - Go to your GitHub repository settings
+   - Add these secrets:
+     - `GCP_SA_KEY`: Content of your service account JSON key
+     - `GOOGLE_CLOUD_PROJECT`: Your project ID
+     - `GOOGLE_CLOUD_REGION`: Your chosen region
+
+Note: Keep your service account credentials secure and never commit them to version control.
 
 
