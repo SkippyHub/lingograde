@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy frontend build to nginx's serve directory
-COPY --from=frontend-builder /app/frontend/dist/* /usr/share/nginx/html/
+COPY --from=frontend-builder /app/frontend/dist /usr/share/nginx/html/
 
 # Install backend dependencies
 COPY pyproject.toml poetry.lock ./
@@ -30,8 +30,8 @@ RUN pip install poetry && \
 # Copy application code
 COPY . .
 
-# Set environment variables
+# Cloud Run will set PORT environment variable
 ENV PORT=8000
 
 # Start both nginx and uvicorn
-CMD service nginx start && poetry run uvicorn app.api.main:app --host 0.0.0.0 --port 8000
+CMD ["sh", "-c", "service nginx start && poetry run uvicorn app.api.main:app --host 0.0.0.0 --port $PORT"]

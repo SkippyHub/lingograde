@@ -300,22 +300,19 @@ use make and install, you need
 ```bash
 # Development (experimental)
 make docker-build-dev    # Build development Docker image
-make docker-run-dev      # Run development environment
+make docker-run-dev      # Run development environment with hot reload
+make docker-build       # Build production Docker image
+make docker-run        # Run production environment
 
-make install            # Install dependencies locally
-make run               # Run locally without Docker
-
-
-make frontend-dev      # Run frontend development server
+# Local Development Commands
+make install           # Install dependencies
+make run              # Run development servers locally
+make frontend-dev     # Run frontend development server
 make api              # Run API development server
 
-# Production 
-make docker-build      # Build production Docker image
-make docker-run       # Run production environment
-make run-prod         # Run production locally
-
-# Utilities
+# Utility Commands
 make clean            # Clean build artifacts
+make clean-all
 make lint             # Run linters
 make test             # Run tests
 ```

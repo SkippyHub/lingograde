@@ -4,4 +4,4 @@
 poetry run uvicorn app.api.main:app --host 0.0.0.0 --port 8000 --reload &
 
 # Change to frontend directory and start development server
-cd frontend && /app/frontend/node_modules/.bin/vite --host 0.0.0.0
+cd frontend && NODE_ENV=development npm run dev -- --host 0.0.0.0

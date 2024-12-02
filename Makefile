@@ -82,10 +82,10 @@ docker-run-dev:
 
 # Add these new targets
 docker-build-dev:
-	docker build -t lingograde-dev -f Dockerfile.dev .
+	docker build --platform linux/amd64 -t lingograde-dev -f Dockerfile.dev .
 
 docker-run-dev: docker-build-dev
-	docker run -p 3000:3000 -p 8000:8000 \
+	docker run --platform linux/amd64 -p 3000:3000 -p 8000:8000 \
 		-e GOOGLE_CLOUD_PROJECT=silent-cider-443411-i4 \
 		-e GOOGLE_CLOUD_REGION=us-central1 \
 		-v $(PWD):/app \
