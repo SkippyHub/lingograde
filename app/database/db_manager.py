@@ -16,6 +16,7 @@ class DatabaseManager:
         self.init_db()
         self.migrate_db()
         self.create_tables()
+        self.ensure_default_user()
 
     def init_db(self):
         c = self.conn.cursor()
@@ -169,6 +170,30 @@ class DatabaseManager:
         except Exception as e:
             print(f"Error verifying user: {e}")
             return False
+
+    def user_exists(self, username: str) -> bool:
+        """Check if a user exists in the database"""
+        try:
+            with self.conn:
+                result = self.conn.execute(
+                    'SELECT id FROM users WHERE username = ?',
+                    (username,)
+                ).fetchone()
+                return result is not None
+        except Exception as e:
+            print(f"Error checking user existence: {e}")
+            return False
+
+    def ensure_default_user(self):
+        """Create a default test user if it doesn't exist"""
+        default_username = "test"
+        default_password = "test"
+        
+        if not self.user_exists(default_username):
+            if self.create_user(default_username, default_password):
+                print(f"Created default test user: {default_username}")
+            else:
+                print(f"Failed to create default test user: {default_username}")
 
     def delete_recording(self, user_id: str, filename: str) -> bool:
         """Delete a recording from the database"""

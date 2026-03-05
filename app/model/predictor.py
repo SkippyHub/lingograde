@@ -19,6 +19,8 @@ print("=============================================\n")
 class AIModel:
     def __init__(self):
         self.loaded = False
+        self.speech_client = None
+        self.model = None
         try:
             print("\n Initializing Google Cloud clients...")
             # Initialize Speech-to-Text client
@@ -67,8 +69,11 @@ class AIModel:
         except Exception as e:
             print("\n❌ Error initializing clients:")
             print(f"Error details: {str(e)}")
+            print("⚠️  Server will start but audio analysis features will be unavailable.")
+            print("   Please configure Google Cloud credentials to enable full functionality.")
             print("=============================================\n")
-            raise
+            # Don't raise - allow server to start without Google Cloud
+            self.loaded = False
 
     def preprocess_audio(self, audio_bytes: bytes) -> Dict[str, Any]:
         """Process audio for Google Cloud Speech-to-Text"""
@@ -139,6 +144,15 @@ class AIModel:
             Grade a user's response using Gemini
             Returns a structured format for both database storage and API response
             """
+            if not self.loaded or self.model is None:
+                return {
+                    'coherence': 0.0,
+                    'grammar': 0.0,
+                    'vocabulary': 0.0,
+                    'explanation': 'Grading service is not available. Please configure Google Cloud credentials.',
+                    'notes': 'Model not loaded',
+                    'timestamp': datetime.datetime.utcnow().isoformat()
+                }
             try:
                 prompt = f"""
                 Given a question and user response, return a JSON format evaluating the user's response based on coherence, grammar, and vocabulary.

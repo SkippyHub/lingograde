@@ -10,9 +10,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration
-SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY") or "dev-secret-key-change-in-production-please-use-a-strong-random-key"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+if not SECRET_KEY:
+    raise ValueError("JWT_SECRET_KEY must be set in environment variables or use the default dev key")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
 

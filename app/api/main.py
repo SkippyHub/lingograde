@@ -20,7 +20,7 @@ app = FastAPI()
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
@@ -56,6 +56,12 @@ async def analyze_audio(
     prompt: str = Form(...),
     current_user: User = Depends(get_current_user)
 ):
+    if not model.loaded:
+        raise HTTPException(
+            status_code=503,
+            detail="Audio analysis service is not available. Please configure Google Cloud credentials."
+        )
+    
     logger.debug(f"Received audio file: {audio.filename}")
     audio_bytes = await audio.read()
     logger.debug(f"Audio size: {len(audio_bytes)} bytes")
