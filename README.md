@@ -1,5 +1,7 @@
 # lingograde
 
+![Lingograde](docs/screenshot.png)
+
 Portfolio: https://www.marlonleong.com/projects/lingograde
 
 lingo grade, grades your speech, identifies issues, and enhances language skills to become a native speaker.
